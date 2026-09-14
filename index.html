@@ -156,14 +156,13 @@
     </div>
   </section>
 
-  <!-- ============ TEASER ============ -->
+  <!-- ============ METHOD (hero figure) ============ -->
   <div class="teaser">
     <figure>
-      <!-- assets/teaser.png — Fig. 1 cross-view LiDAR-to-DEM localization (high resolution).
-           A short clip (teaser.gif / teaser.mp4) may be used instead.
+      <!-- assets/pipeline.png — Fig. 2 SplineLoc pipeline (high resolution).
            STRIP metadata; verify no lab-identifying detail in any frame. -->
-      <img src="assets/teaser.png" alt="Cross-view localization: a dense rover LiDAR scan registered to a coarse orbital DEM to recover the global planar pose.">
-      <p class="cap">A dense rover LiDAR scan is registered to a coarse orbital DEM to recover the rover's global planar pose, across a large viewpoint and resolution gap.</p>
+      <img src="assets/pipeline.png" alt="Two-stage SplineLoc pipeline: FFT-based global retrieval over heading and translation, followed by SE(2) refinement on raw LiDAR points.">
+      <p class="cap">Offline, the DEM is fitted with a cubic B-spline height field. Online, the levelled scan is fitted with its own spline and sampled at 24 headings; the offset-invariant height objective is evaluated over the translation lattice by masked FFT, and the retained candidates are refined and re-ranked using raw LiDAR points and the analytic gradient of the map field.</p>
     </figure>
   </div>
 
@@ -195,20 +194,6 @@
           <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" title="Supplementary video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
         <figcaption>High-resolution version of the submitted supplementary video.</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <hr class="divider">
-
-  <!-- ============ METHOD ============ -->
-  <section class="section">
-    <div class="section-inner">
-      <h2>Method Overview</h2>
-      <figure>
-        <!-- assets/pipeline.png — Fig. 2 SplineLoc pipeline (high resolution). -->
-        <img src="assets/pipeline.png" alt="Two-stage SplineLoc pipeline: FFT-based global retrieval over heading and translation, followed by SE(2) refinement on raw LiDAR points.">
-        <figcaption><b>Overview of SplineLoc.</b> Offline, the DEM is fitted with a cubic B-spline height field. Online, the levelled scan is fitted with its own spline and sampled at 24 headings. The offset-invariant height objective is evaluated over the translation lattice by masked FFT, and the retained candidates are refined and re-ranked using raw LiDAR points and the analytic gradient of the map field.</figcaption>
       </figure>
     </div>
   </section>

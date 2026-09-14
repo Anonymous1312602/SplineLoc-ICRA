@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Keep the page out of search engines so the paper title cannot surface it and de-anonymize the authors during review. -->
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Anonymous: no author, no affiliation, no analytics, no external account-linked embeds (no YouTube/Drive). -->
+  <title>SplineLoc: Map-Wide Single-Scan Localization from Rover LiDAR to Coarse Lunar DEMs</title>
+
+  <style>
+    :root{
+      --ink:#363636;
+      --body:#4a4a4a;
+      --muted:#7a7a7a;
+      --btn:#363636;
+      --btn-hover:#4f4f4f;
+      --line:#ededed;
+      --bg:#ffffff;
+      --hero-w:1000px;
+      --text-w:760px;
+    }
+    *{box-sizing:border-box;}
+    html{-webkit-text-size-adjust:100%;}
+    body{
+      margin:0;background:var(--bg);color:var(--body);
+      font-family:"Noto Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      line-height:1.6;font-size:17px;
+    }
+    a{color:#3273dc;text-decoration:none;}
+    a:hover{text-decoration:underline;}
+
+    /* ---------- Hero ---------- */
+    .hero{padding:70px 24px 28px;text-align:center;}
+    .hero-inner{max-width:var(--hero-w);margin:0 auto;}
+    .title{
+      color:var(--ink);font-weight:600;
+      font-size:clamp(26px,4vw,38px);line-height:1.25;text-wrap:balance;
+      letter-spacing:-0.01em;margin:0 0 26px;
+    }
+    .authors{font-size:19px;color:var(--ink);margin:0 0 4px;font-weight:500;}
+    .affil{font-size:16px;color:var(--muted);margin:0 0 6px;}
+    .review-note{font-size:15px;color:var(--muted);margin:10px 0 0;font-style:italic;}
+
+    /* ---------- Link buttons ---------- */
+    .buttons{display:flex;justify-content:center;flex-wrap:wrap;gap:12px;margin:30px 0 4px;}
+    .btn{
+      display:inline-flex;align-items:center;gap:8px;
+      background:var(--btn);color:#fff;font-size:15px;font-weight:500;
+      padding:9px 20px;border-radius:999px;line-height:1;
+      transition:background-color .15s ease;
+    }
+    .btn:hover{background:var(--btn-hover);text-decoration:none;}
+    .btn:focus-visible{outline:3px solid #9bb8e8;outline-offset:2px;}
+    .btn svg{width:17px;height:17px;fill:currentColor;flex:0 0 auto;}
+
+    /* ---------- Teaser ---------- */
+    .teaser{max-width:var(--hero-w);margin:40px auto 0;padding:0 24px;}
+    .teaser img,.teaser video{
+      width:100%;height:auto;display:block;border-radius:8px;
+      border:1px solid var(--line);background:#fafafa;
+    }
+    .teaser .cap{font-size:15px;color:var(--muted);margin-top:14px;text-align:center;font-style:italic;}
+
+    /* ---------- Sections ---------- */
+    .section{padding:50px 24px;}
+    .section-inner{max-width:var(--hero-w);margin:0 auto;}
+    .section h2{
+      color:var(--ink);font-weight:600;font-size:30px;
+      text-align:center;margin:0 0 26px;
+    }
+    .narrow{max-width:var(--text-w);margin:0 auto;}
+    .abstract p{margin:0 0 16px;text-align:justify;}
+    .keywords{font-size:15px;color:var(--muted);text-align:center;margin-top:22px;}
+    .keywords b{color:var(--ink);font-weight:600;}
+
+    /* ---------- Findings list ---------- */
+    .findings{max-width:var(--text-w);margin:0 auto 30px;padding:0;list-style:none;}
+    .findings li{
+      border-left:2px solid var(--line);padding:2px 0 2px 18px;margin:0 0 16px;
+      font-size:16px;
+    }
+    .findings li b{color:var(--ink);font-weight:600;}
+
+    /* ---------- Media blocks ---------- */
+    figure{margin:0;}
+    figure + figure{margin-top:34px;}
+    video.block,figure img{
+      width:100%;height:auto;display:block;border-radius:8px;
+      border:1px solid var(--line);background:#fafafa;
+    }
+    figcaption{font-size:15px;color:var(--muted);margin-top:14px;line-height:1.55;text-align:center;}
+    figcaption b{color:var(--ink);font-weight:600;}
+    .video-embed{position:relative;padding-top:56.25%;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:#000;}
+    .video-embed iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0;}
+
+    /* ---------- Code ---------- */
+    .code-note{max-width:var(--text-w);margin:0 auto;text-align:center;}
+    .code-note p{margin:0;}
+
+    /* ---------- BibTeX ---------- */
+    pre{
+      background:#f5f5f5;border:1px solid var(--line);border-radius:8px;
+      padding:18px 20px;overflow-x:auto;font-size:14px;line-height:1.5;
+      color:#444;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      max-width:var(--text-w);margin:0 auto;
+    }
+
+    /* ---------- Footer ---------- */
+    footer{padding:40px 24px 64px;text-align:center;font-size:13px;color:var(--muted);border-top:1px solid var(--line);}
+    footer p{margin:6px 0;}
+
+    .divider{border:none;border-top:1px solid var(--line);max-width:var(--hero-w);margin:0 auto;}
+
+    @media (max-width:600px){
+      body{font-size:16px;}
+      .hero{padding:48px 20px 24px;}
+      .section{padding:38px 20px;}
+      .section h2{font-size:25px;}
+    }
+    @media (prefers-reduced-motion:reduce){
+      .btn{transition:none;}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero-inner">
+      <h1 class="title">SplineLoc: Map-Wide Single-Scan Localization<br>from Rover LiDAR to Coarse Lunar DEMs</h1>
+
+      <p class="authors">Anonymous ICRA Submission</p>
+      <p class="review-note">Paper under double-anonymous review</p>
+
+      <div class="buttons">
+        <!-- Paper PDF: place the anonymized submission at assets/paper.pdf (strip metadata / blank pdfauthor first). -->
+        <a class="btn" href="assets/paper.pdf">
+          <svg viewBox="0 0 384 512" aria-hidden="true"><path d="M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zM256 0V128H384L256 0z"/></svg>
+          Paper
+        </a>
+        <a class="btn" href="#video">
+          <svg viewBox="0 0 384 512" aria-hidden="true"><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg>
+          Video
+        </a>
+        <a class="btn" href="#code">
+          <svg viewBox="0 0 640 512" aria-hidden="true"><path d="M392.8 1.2c-17-4.9-34.7 5-39.6 22l-128 448c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l128-448c4.9-17-5-34.7-22-39.6zM480 96c-12.5 12.5-12.5 32.8 0 45.3L538.7 200 480 258.7c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l80-80c12.5-12.5 12.5-32.8 0-45.3l-80-80c-12.5-12.5-32.8-12.5-45.3 0zm-320 0c-12.5-12.5-32.8-12.5-45.3 0l-80 80c-12.5 12.5-12.5 32.8 0 45.3l80 80c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L101.3 200 160 141.3c12.5-12.5 12.5-32.8 0-45.3z"/></svg>
+          Code
+        </a>
+        <!-- Code/Data links omitted during double-anonymous review (a group-named GitHub URL would de-anonymize).
+             Add the repository link in the camera-ready version, e.g.:
+             <a class="btn" href="https://github.com/your-org/your-repo">Code</a> -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TEASER ============ -->
+  <div class="teaser">
+    <figure>
+      <!-- assets/teaser.png — Fig. 1 cross-view LiDAR-to-DEM localization (high resolution).
+           A short clip (teaser.gif / teaser.mp4) may be used instead.
+           STRIP metadata; verify no lab-identifying detail in any frame. -->
+      <img src="assets/teaser.png" alt="Cross-view localization: a dense rover LiDAR scan registered to a coarse orbital DEM to recover the global planar pose.">
+      <p class="cap">A dense rover LiDAR scan is registered to a coarse orbital DEM to recover the rover's global planar pose, across a large viewpoint and resolution gap.</p>
+    </figure>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ============ ABSTRACT ============ -->
+  <section class="section">
+    <div class="section-inner">
+      <h2>Abstract</h2>
+      <div class="abstract">
+        <p>Long-range lunar rovers rely on dead-reckoning that drifts without bound, so periodic global fixes are needed to keep the pose estimate stable over a traverse. Orbital digital elevation models (DEMs) offer globally referenced terrain, but their coarse sampling differs substantially from dense rover LiDAR observations. We present SplineLoc, a single-scan LiDAR-to-DEM localization method that searches the full extent of a supplied DEM without position or heading initialization, terrain-landmark extraction, or a reference-scan database.</p>
+        <p>Given a scan levelled using externally supplied roll and pitch, we represent the DEM and scan as cubic B-spline height fields, providing a common continuous representation for height comparison. An offset-invariant height objective decomposes into masked cross-correlations, enabling FFT evaluation over lattice translations at sampled headings. Retained candidates are then refined and re-ranked using raw LiDAR points and the analytic gradient of the map height field.</p>
+        <p>On four lunar terrains simulated from real orbital topography and six DEM resolutions from 0.25 to 10 m/pixel, one configuration achieved the highest SR@5m in all 24 site–resolution conditions. Mean SR@5m remained 91.75% at 10 m/pixel, compared with 2.75% for the strongest baseline at that resolution. Performance also remained high on the 2000 × 2000 m Apollo 14 and Apollo 15 maps, indicating that the method remains effective under both substantial DEM coarsening and map-wide search over large terrain regions. Replacing the simulation-derived reference maps with aligned native orbital products changed SR@5m by at most two percentage points, suggesting that localization is driven by terrain structure preserved across map representations rather than fine-scale details specific to the simulation.</p>
+        <p class="keywords"><b>Index Terms —</b> Lunar Rover, Global Localization, LiDAR-to-DEM Registration, Cross-View Localization, B-Spline Height Field</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ============ VIDEO ============ -->
+  <section class="section" id="video">
+    <div class="section-inner">
+      <h2>Supplementary Video</h2>
+      <figure>
+        <!-- Unlisted YouTube on a THROWAWAY channel (no real name/handle, no other videos), via nocookie.
+             Replace VIDEO_ID with your unlisted video's ID (the part after watch?v= or youtu.be/). -->
+        <div class="video-embed">
+          <iframe src="https://www.youtube-nocookie.com/embed/VIDEO_ID" title="Supplementary video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <figcaption>High-resolution version of the submitted supplementary video.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ============ METHOD ============ -->
+  <section class="section">
+    <div class="section-inner">
+      <h2>Method Overview</h2>
+      <figure>
+        <!-- assets/pipeline.png — Fig. 2 SplineLoc pipeline (high resolution). -->
+        <img src="assets/pipeline.png" alt="Two-stage SplineLoc pipeline: FFT-based global retrieval over heading and translation, followed by SE(2) refinement on raw LiDAR points.">
+        <figcaption><b>Overview of SplineLoc.</b> Offline, the DEM is fitted with a cubic B-spline height field. Online, the levelled scan is fitted with its own spline and sampled at 24 headings. The offset-invariant height objective is evaluated over the translation lattice by masked FFT, and the retained candidates are refined and re-ranked using raw LiDAR points and the analytic gradient of the map field.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ============ RESULTS ============ -->
+  <section class="section">
+    <div class="section-inner">
+      <h2>Localization Across DEM Resolutions</h2>
+
+      <ul class="findings">
+        <li><b>Highest SR@5m in all 24 site–resolution conditions</b>, with median horizontal errors of 1.03–1.86 m against DARCES, BEVPlace++, RING, and multi-start ICP.</li>
+        <li><b>Graceful degradation with map coarsening.</b> Averaged over the four sites, SR@5m decreased only from 94.75% at 0.25 m/pixel to 91.75% at 10 m/pixel, where the strongest baseline reached 2.75%.</li>
+        <li><b>Map-wide search over 2000 × 2000 m.</b> At 10 m/pixel, Apollo 14 and Apollo 15 retained 96% and 97% SR@5m with median errors of 1.22 m and 1.84 m, without position or heading initialization.</li>
+        <li><b>Native orbital reference maps.</b> Replacing the simulation-derived maps with aligned LROC NAC DTM and SfS products changed SR@5m by at most two percentage points.</li>
+      </ul>
+
+      <figure>
+        <!-- assets/results_sr.png — Fig. 3 SR@5m across DEM resolutions at four lunar sites (high resolution). -->
+        <img src="assets/results_sr.png" alt="Success rate within 5 m across six DEM resolutions at Apollo 11, Apollo 14, Apollo 15, and Haworth for all compared methods.">
+        <figcaption><b>Localization success rate (SR@5m) across DEM resolutions at four lunar sites.</b> Each method is evaluated on the same 100 query scans per site at all six resolutions, with the 5 m success threshold held fixed throughout the sweep.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ============ QUALITATIVE ============ -->
+  <section class="section">
+    <div class="section-inner">
+      <h2>Qualitative Localization Results</h2>
+      <figure>
+        <!-- assets/qualitative.png — Fig. 4 qualitative localization at 2 and 10 m/pixel (high resolution). -->
+        <img src="assets/qualitative.png" alt="The same query localized independently against 2 m/pixel and 10 m/pixel reference maps at Apollo 11 and Apollo 14, with ground-truth and estimated poses marked.">
+        <figcaption><b>Qualitative localization across DEM resolutions.</b> Within each row, the same query is localized independently against reference maps at 2 and 10 m/pixel. Shading marks LiDAR support at the estimated pose; crosses and circles mark ground-truth and estimated positions, with 8 × 8 m insets. Crops are for visualization only — localization searches the full supplied DEM.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ============ CODE ============ -->
+  <section class="section" id="code">
+    <div class="section-inner">
+      <h2>Code</h2>
+      <div class="code-note">
+        <p>The source code will be released publicly upon acceptance. The repository link will be added here in the camera-ready version.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- ============ BIBTEX ============ -->
+  <section class="section">
+    <div class="section-inner">
+      <h2>BibTeX</h2>
+      <pre>% Citation withheld during double-anonymous review.
+% The BibTeX entry will be added in the camera-ready version.</pre>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer>
+    <p>Anonymous submission. All author- and institution-identifying information has been removed for double-anonymous review.</p>
+    <p>This page uses the project page template by <a href="https://nerfies.github.io/">Nerfies</a>.</p>
+  </footer>
+
+</body>
+</html>

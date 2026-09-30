@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="SplineLoc: Single-Scan Cross-View Localization from Rover LiDAR to Coarse Lunar DEMs. Anonymous ICRA submission project page.">
+  <title>SplineLoc: Single-Scan Cross-View Localization from Rover LiDAR to Coarse Lunar DEMs</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M10 68 C28 20 55 88 90 30' fill='none' stroke='%23232b34' stroke-width='9' stroke-linecap='round'/%3E%3C/svg%3E">
+
+  <style>
+    :root{
+      --ink:#24272b;
+      --body:#444b53;
+      --muted:#737b85;
+      --line:#e7e9ec;
+      --soft:#f7f8fa;
+      --panel:#ffffff;
+      --accent:#3f6fb6;
+      --accent-2:#7456a7;
+      --accent-3:#3d8b74;
+      --accent-4:#bf6d38;
+      --dark:#26292d;
+      --max:1120px;
+      --text:820px;
+      --shadow:0 8px 28px rgba(26,31,38,.07);
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+    body{
+      margin:0;
+      background:#fff;
+      color:var(--body);
+      font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      font-size:17px;
+      line-height:1.62;
+    }
+    img,video,iframe,canvas{max-width:100%}
+    a{color:#2f67b1;text-decoration:none}
+    a:hover{text-decoration:underline}
+    strong{color:var(--ink)}
+
+    .container{width:min(var(--max),calc(100% - 40px));margin:0 auto}
+    .narrow{max-width:var(--text);margin:0 auto}
+    .section{padding:68px 0}
+    .divider{border:0;border-top:1px solid var(--line);margin:0}
+    .eyebrow{
+      display:inline-block;
+      font-size:.78rem;
+      text-transform:uppercase;
+      letter-spacing:.11em;
+      color:var(--muted);
+      font-weight:700;
+      margin-bottom:.75rem;
+    }
+    h2.section-title{
+      margin:0 0 1rem;
+      color:var(--ink);
+      font-size:clamp(1.65rem,3vw,2.15rem);
+      line-height:1.2;
+      text-align:center;
+      letter-spacing:-.025em;
+    }
+    .section-lead{
+      max-width:790px;
+      margin:0 auto 2rem;
+      text-align:center;
+      color:#5a626c;
+    }
+    .section-title::after{
+      content:"";
+      display:block;
+      width:50px;height:3px;
+      margin:14px auto 0;
+      border-radius:2px;
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    }
+
+    /* Sticky project navigation */
+    .subnav{
+      position:fixed;
+      left:0;right:0;top:0;
+      z-index:30;
+      background:rgba(255,255,255,.94);
+      backdrop-filter:blur(8px);
+      border-bottom:1px solid var(--line);
+      transform:translateY(-110%);
+      transition:transform .22s ease;
+    }
+    .subnav.visible{transform:translateY(0)}
+    .subnav-inner{
+      width:min(var(--max),calc(100% - 24px));
+      margin:0 auto;
+      display:flex;
+      gap:.15rem;
+      justify-content:center;
+      overflow-x:auto;
+      padding:.58rem 0;
+    }
+    .subnav a{
+      flex:none;
+      color:#535962;
+      font-size:.8rem;
+      font-weight:650;
+      padding:.34rem .7rem;
+      border-radius:7px;
+      white-space:nowrap;
+    }
+    .subnav a:hover{background:#f2f3f5;text-decoration:none}
+    .subnav a.active{background:#2d3035;color:#fff}
+
+    /* Hero */
+    .hero{padding:76px 0 26px;text-align:center}
+    .hero h1{
+      max-width:1060px;
+      margin:0 auto;
+      color:var(--ink);
+      font-size:clamp(2rem,4.7vw,3.1rem);
+      line-height:1.16;
+      letter-spacing:-.038em;
+      font-weight:720;
+      text-wrap:balance;
+    }
+    .venue{margin:1.5rem 0 .15rem;color:var(--ink);font-size:1.14rem;font-weight:650}
+    .authors{margin:.1rem 0;color:#555d66;font-size:1.02rem}
+    .review-badge{
+      display:inline-block;
+      margin-top:.7rem;
+      padding:.28rem .85rem;
+      border-radius:999px;
+      background:#f3f4f6;
+      border:1px solid #e6e8eb;
+      color:#686f78;
+      font-size:.82rem;
+    }
+    .buttons{display:flex;justify-content:center;gap:.7rem;flex-wrap:wrap;margin-top:1.65rem}
+    .btn{
+      display:inline-flex;align-items:center;gap:.48rem;
+      background:#2c3035;color:#fff;
+      border-radius:999px;
+      padding:.66rem 1.15rem;
+      font-size:.88rem;
+      font-weight:650;
+      line-height:1;
+      transition:transform .15s ease,background .15s ease;
+    }
+    .btn:hover{background:#42474e;text-decoration:none;transform:translateY(-1px)}
+    .btn svg{width:16px;height:16px;fill:currentColor}
+
+    /* Top result cards */
+    .stat-wrap{padding:28px 0 54px}
+    .stat-grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:1rem;
+    }
+    .stat-card{
+      --card-accent:var(--accent);
+      position:relative;
+      border:1px solid var(--line);
+      border-radius:13px;
+      background:#fff;
+      min-height:176px;
+      padding:1.3rem 1.15rem 1.1rem;
+      text-align:center;
+      box-shadow:0 1px 3px rgba(0,0,0,.025);
+      overflow:hidden;
+      cursor:pointer;
+      opacity:0;
+      transform:translateY(15px);
+      transition:opacity .45s ease,transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+    }
+    .stat-card.show{opacity:1;transform:translateY(0)}
+    .stat-card::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--card-accent)}
+    .stat-card:hover,.stat-card.selected{transform:translateY(-3px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--card-accent) 45%,#ddd)}
+    .stat-number{display:block;margin-top:.12rem;color:var(--ink);font-weight:760;font-size:1.55rem;line-height:1.17;letter-spacing:-.025em}
+    .stat-label{display:block;margin-top:.55rem;color:#626a74;font-size:.84rem;line-height:1.45}
+    .stat-hint{display:block;margin-top:.65rem;color:var(--card-accent);font-size:.7rem;font-weight:700}
+    .stat-detail{
+      max-height:0;
+      overflow:hidden;
+      opacity:0;
+      max-width:760px;
+      margin:0 auto;
+      transition:max-height .3s ease,opacity .25s ease,margin .25s ease;
+    }
+    .stat-detail.open{max-height:420px;opacity:1;margin-top:1.2rem}
+    .stat-detail-inner{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.3rem;text-align:left;font-size:.92rem}
+    .stat-detail-inner p{margin:.35rem 0}
+
+    /* Media */
+    .media-card{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;box-shadow:0 3px 16px rgba(20,25,32,.045)}
+    .media-card img{display:block;width:100%;height:auto;background:#fff}
+    .caption{margin:.85rem auto 0;max-width:920px;color:var(--muted);font-size:.86rem;line-height:1.48;text-align:center}
+    .caption strong{font-weight:700}
+    .hero-figure{margin-top:2rem}
+
+    /* Abstract / motivation */
+    .abstract-grid{display:grid;grid-template-columns:1.13fr .87fr;gap:2rem;align-items:center}
+    .abstract-text p{margin:.2rem 0 1rem;text-align:justify}
+    .motivation-card{padding:1rem;background:#fbfbfc;border:1px solid var(--line);border-radius:12px}
+    .motivation-card img{display:block;width:100%;border-radius:7px}
+    .mini-note{font-size:.82rem;color:var(--muted);margin-top:.7rem;line-height:1.5}
+
+    /* Contributions */
+    .card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+    .info-card{
+      --card-accent:var(--accent);
+      position:relative;
+      background:#fff;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:1.35rem 1.25rem;
+      min-height:210px;
+      overflow:hidden;
+      opacity:0;transform:translateY(14px);
+      transition:opacity .45s ease,transform .22s ease,box-shadow .22s ease,border-color .22s ease;
+    }
+    .info-card.show{opacity:1;transform:none}
+    .info-card::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--card-accent)}
+    .info-card:hover{transform:translateY(-3px);box-shadow:var(--shadow);border-color:#dce0e6}
+    .info-index{font-size:1.3rem;font-weight:800;color:var(--card-accent);line-height:1;margin-bottom:.75rem}
+    .info-card h3{font-size:1.03rem;line-height:1.3;margin:0 0 .55rem;color:var(--ink)}
+    .info-card p{font-size:.9rem;line-height:1.52;margin:0;color:#5f6670}
+
+    /* Method */
+    .flow{
+      display:flex;align-items:stretch;justify-content:center;gap:.48rem;
+      margin:1.65rem 0 1rem;
+    }
+    .flow-node{
+      flex:1;
+      min-width:0;
+      border:1px solid #dfe2e6;
+      border-radius:10px;
+      background:#fff;
+      padding:.9rem .75rem;
+      text-align:center;
+      cursor:pointer;
+      transition:background .15s ease,color .15s ease,border-color .15s ease,transform .15s ease;
+    }
+    .flow-node:hover{transform:translateY(-2px);border-color:#aeb5bd}
+    .flow-node.active{background:#2c3035;border-color:#2c3035;color:#fff}
+    .flow-node .n{font-size:.72rem;font-weight:800;opacity:.68}
+    .flow-node .label{font-size:.85rem;font-weight:700;line-height:1.3;margin-top:.28rem}
+    .flow-arrow{align-self:center;color:#bbc0c7;font-size:1.3rem}
+    .flow-detail{max-width:900px;margin:1rem auto 0;padding:1rem 1.2rem;background:#f7f8fa;border:1px solid var(--line);border-radius:10px}
+    .flow-detail h3{margin:0 0 .35rem;color:var(--ink);font-size:1rem}
+    .flow-detail p{margin:0;font-size:.9rem}
+    .method-figure{margin-top:1.7rem}
+    .method-note{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.25rem
+    }
+    .method-note div{background:#fafbfc;border:1px solid var(--line);border-radius:10px;padding:1rem}
+    .method-note b{display:block;color:var(--ink);font-size:.86rem;margin-bottom:.28rem}
+    .method-note span{display:block;color:#666e77;font-size:.82rem;line-height:1.48}
+
+    /* Evaluation */
+    .eval-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:2rem;align-items:start}
+    .site-list{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+    .site-card{border:1px solid var(--line);border-radius:10px;padding:1rem;background:#fff}
+    .site-card h3{margin:0;color:var(--ink);font-size:.98rem}
+    .site-card .meta{font-size:.78rem;color:var(--muted);margin:.12rem 0 .45rem}
+    .site-card p{margin:0;font-size:.84rem;line-height:1.45;color:#5e6670}
+    .protocol-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:.65rem;margin-top:1.1rem}
+    .protocol-item{background:#f8f9fb;border:1px solid var(--line);border-radius:9px;padding:.8rem;text-align:center}
+    .protocol-item strong{display:block;font-size:1rem}
+    .protocol-item span{font-size:.75rem;color:var(--muted);line-height:1.35;display:block;margin-top:.15rem}
+
+    /* Results chart/table */
+    .chart-wrap{border:1px solid var(--line);border-radius:12px;background:#fff;padding:1rem 1rem .5rem;box-shadow:0 2px 10px rgba(20,25,32,.035)}
+    #sr-chart{width:100%;height:330px;display:block}
+    .legend{display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;font-size:.76rem;color:#5d6570;margin:.4rem 0 .7rem}
+    .legend span{display:inline-flex;align-items:center;gap:.35rem}
+    .swatch{width:19px;height:3px;border-radius:2px;display:inline-block}
+    .table-scroll{overflow:auto;border:1px solid var(--line);border-radius:10px;margin-top:1rem}
+    table{border-collapse:collapse;width:100%;font-size:.82rem;min-width:690px}
+    th,td{padding:.62rem .7rem;border-bottom:1px solid #eceef0;text-align:center;white-space:nowrap}
+    th{background:#2c3035;color:#fff;font-weight:650}
+    tbody tr:last-child td{border-bottom:0}
+    tbody tr:hover{background:#fafbfc}
+    td.ours{font-weight:760;background:#eff6f2;color:#225d4d}
+    .table-note{font-size:.78rem;color:var(--muted);margin:.6rem .1rem 0}
+    .site-result-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-top:1.4rem}
+    .site-result{border:1px solid var(--line);border-radius:10px;padding:1rem;text-align:center;background:#fff}
+    .site-result h3{margin:0;color:var(--ink);font-size:.9rem}
+    .site-result .big{font-size:1.55rem;font-weight:780;color:var(--accent);margin:.2rem 0 0;line-height:1.2}
+    .site-result .small{font-size:.77rem;color:var(--muted);margin-top:.28rem}
+
+    /* Robustness */
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;align-items:start}
+    .callout{
+      border:1px solid var(--line);border-radius:12px;background:#fff;padding:1.15rem 1.2rem;
+      box-shadow:0 2px 10px rgba(20,25,32,.025)
+    }
+    .callout h3{margin:.05rem 0 .45rem;color:var(--ink);font-size:1.03rem}
+    .callout p{margin:.35rem 0;font-size:.88rem}
+    .metric-pair{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-top:.85rem}
+    .metric-box{background:#f8f9fa;border-radius:9px;padding:.8rem;text-align:center}
+    .metric-box strong{font-size:1.2rem;display:block}
+    .metric-box span{display:block;color:var(--muted);font-size:.73rem;line-height:1.35;margin-top:.15rem}
+    .compact-table table{min-width:0;font-size:.79rem}
+    .compact-table th,.compact-table td{padding:.52rem .55rem}
+    .runtime-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-top:1rem}
+    .runtime-item{border:1px solid var(--line);border-radius:9px;padding:.9rem;text-align:center;background:#fafbfc}
+    .runtime-item strong{display:block;font-size:1.05rem}
+    .runtime-item span{display:block;color:var(--muted);font-size:.75rem;line-height:1.35;margin-top:.15rem}
+
+    /* Video */
+    .video-frame{position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#000;box-shadow:var(--shadow)}
+    .video-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+    /* Code / BibTeX */
+    .code-note{max-width:760px;margin:0 auto;text-align:center}
+    pre{
+      max-width:820px;margin:0 auto;
+      background:#1f2226;color:#d8dce2;
+      border-radius:10px;padding:1.2rem 1.35rem;
+      overflow:auto;font-size:.8rem;line-height:1.55;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    }
+    .bib-wrap{position:relative;max-width:820px;margin:0 auto}
+    .copy-btn{position:absolute;right:.7rem;top:.7rem;border:0;border-radius:6px;background:#3a3e44;color:#fff;padding:.36rem .65rem;font-size:.7rem;cursor:pointer}
+    .copy-btn:hover{background:#50565e}
+
+    footer{padding:42px 20px 60px;text-align:center;border-top:1px solid var(--line);color:var(--muted);font-size:.76rem}
+    footer p{margin:.25rem 0}
+
+    .reveal{opacity:0;transform:translateY(14px);transition:opacity .45s ease,transform .45s ease}
+    .reveal.show{opacity:1;transform:none}
+
+    @media(max-width:900px){
+      .stat-grid{grid-template-columns:1fr 1fr}
+      .abstract-grid,.eval-grid,.two-col{grid-template-columns:1fr}
+      .card-grid{grid-template-columns:1fr}
+      .method-note{grid-template-columns:1fr}
+      .site-result-grid{grid-template-columns:1fr 1fr}
+      .runtime-grid{grid-template-columns:1fr 1fr}
+    }
+    @media(max-width:640px){
+      body{font-size:16px}
+      .hero{padding-top:56px}
+      .section{padding:48px 0}
+      .container{width:min(var(--max),calc(100% - 26px))}
+      .stat-grid{grid-template-columns:1fr}
+      .flow{flex-direction:column}
+      .flow-arrow{transform:rotate(90deg)}
+      .site-list,.protocol-strip,.site-result-grid,.runtime-grid{grid-template-columns:1fr}
+      .hero h1{font-size:2rem}
+    }
+    @media(prefers-reduced-motion:reduce){
+      html{scroll-behavior:auto}
+      *,*::before,*::after{transition:none!important;animation:none!important}
+      .reveal,.stat-card,.info-card{opacity:1;transform:none}
+    }
+  </style>
+</head>
+<body>
+
+<nav class="subnav" id="subnav" aria-label="Section navigation">
+  <div class="subnav-inner">
+    <a href="#abstract">Abstract</a>
+    <a href="#contributions">Contributions</a>
+    <a href="#method">Method</a>
+    <a href="#evaluation">Evaluation</a>
+    <a href="#results">Results</a>
+    <a href="#robustness">Robustness</a>
+    <a href="#video">Video</a>
+    <a href="#code">Code</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="container">
+    <h1>SplineLoc: Single-Scan Cross-View Localization<br>from Rover LiDAR to Coarse Lunar DEMs</h1>
+    <p class="venue">Anonymous ICRA Submission</p>
+    <p class="authors">Author and affiliation information withheld for double-anonymous review</p>
+    <span class="review-badge">Under double-anonymous review</span>
+
+    <div class="buttons">
+      <a class="btn" href="assets/paper.pdf" aria-label="Open paper PDF">
+        <svg viewBox="0 0 384 512" aria-hidden="true"><path d="M64 0C28.7 0 0 28.7 0 64V448c0 35.3 28.7 64 64 64H320c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zM256 0V128H384L256 0z"/></svg>
+        Paper
+      </a>
+      <a class="btn" href="#video" aria-label="Jump to supplementary video">
+        <svg viewBox="0 0 384 512" aria-hidden="true"><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg>
+        Video
+      </a>
+      <a class="btn" href="#code" aria-label="Jump to code release information">
+        <svg viewBox="0 0 640 512" aria-hidden="true"><path d="M392.8 1.2c-17-4.9-34.7 5-39.6 22l-128 448c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l128-448c4.9-17-5-34.7-22-39.6zM480 96c-12.5 12.5-12.5 32.8 0 45.3L538.7 200 480 258.7c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l80-80c12.5-12.5 12.5-32.8 0-45.3l-80-80c-12.5-12.5-32.8-12.5-45.3 0zm-320 0c-12.5-12.5-32.8-12.5-45.3 0l-80 80c-12.5 12.5-12.5 32.8 0 45.3l80 80c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L101.3 200 160 141.3c12.5-12.5 12.5-32.8 0-45.3z"/></svg>
+        Code
+      </a>
+    </div>
+  </div>
+</header>
+
+<section class="stat-wrap">
+  <div class="container">
+    <div class="stat-grid" id="stat-grid">
+      <article class="stat-card" style="--card-accent:#3f6fb6" data-stat="settings" tabindex="0">
+        <span class="stat-number">24 / 24</span>
+        <span class="stat-label">site-resolution conditions with the highest SR@5m among evaluated methods</span>
+        <span class="stat-hint">Details &rsaquo;</span>
+      </article>
+      <article class="stat-card" style="--card-accent:#3d8b74" data-stat="coarse" tabindex="0">
+        <span class="stat-number">91.75%</span>
+        <span class="stat-label">mean SR@5m at 10 m/pixel, compared with 2.75% for RING</span>
+        <span class="stat-hint">Details &rsaquo;</span>
+      </article>
+      <article class="stat-card" style="--card-accent:#7456a7" data-stat="mapwide" tabindex="0">
+        <span class="stat-number">2 km &times; 2 km</span>
+        <span class="stat-label">map-wide search at Apollo 14/15; 96% and 97% SR@5m at 10 m/pixel</span>
+        <span class="stat-hint">Details &rsaquo;</span>
+      </article>
+      <article class="stat-card" style="--card-accent:#bf6d38" data-stat="runtime" tabindex="0">
+        <span class="stat-number">1.6-5.9 s</span>
+        <span class="stat-label">online CPU runtime across the four sites; periodic global-fix use case</span>
+        <span class="stat-hint">Details &rsaquo;</span>
+      </article>
+    </div>
+    <div class="stat-detail" id="stat-detail" aria-live="polite"></div>
+
+    <div hidden id="stat-settings">
+      <div class="stat-detail-inner"><p><strong>Table I:</strong> SplineLoc has the highest SR@5m in every one of the 24 combinations formed by four sites and six reference-map resolutions (0.25, 0.5, 1, 2, 5, and 10 m/pixel). Its median horizontal errors remain in the 1.03-1.86 m range.</p></div>
+    </div>
+    <div hidden id="stat-coarse">
+      <div class="stat-detail-inner"><p>At 10 m/pixel, the four-site mean SR@5m is <strong>91.75%</strong> for SplineLoc. RING, the strongest evaluated baseline at the two coarsest resolutions, reaches <strong>2.75%</strong> at 10 m/pixel. SplineLoc's four-site mean is 94.50% at 5 m/pixel.</p></div>
+    </div>
+    <div hidden id="stat-mapwide">
+      <div class="stat-detail-inner"><p>Apollo 14 and Apollo 15 use 2000 &times; 2000 m reference maps. At 10 m/pixel, SplineLoc obtains <strong>96% SR@5m / 1.22 m median</strong> on Apollo 14 and <strong>97% / 1.84 m</strong> on Apollo 15, without position or heading initialization.</p></div>
+    </div>
+    <div hidden id="stat-runtime">
+      <div class="stat-detail-inner"><p>Single-process CPU timings are 1.6 s at Apollo 11, 4.5-5.1 s at Apollo 14/15, and 5.7-5.9 s at Haworth. FFT retrieval takes 0.15-1.24 s; scan fitting dominates the online cost. Offline map fitting is at most 0.22 s in the reported setup.</p></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section" id="abstract">
+  <div class="container">
+    <h2 class="section-title">Abstract</h2>
+    <div class="abstract-grid">
+      <div class="abstract-text reveal">
+        <p>We present <strong>SplineLoc</strong>, a single-scan cross-view localization method that matches rover LiDAR against coarse lunar digital elevation models (DEMs) by representing both as continuous cubic B-spline height fields. Existing LiDAR global localization methods typically rely on reference-scan databases, while planetary approaches often require landmarks, temporal accumulation, or bounded initialization, making direct single-scan localization against coarse orbital DEMs challenging.</p>
+        <p>SplineLoc performs map-wide retrieval with an offset-invariant relative-height objective evaluated through masked Fast Fourier Transform (FFT) correlation, then refines retained candidates directly on measured LiDAR points against the continuous map spline. Experiments use four lunar sites built from real orbital topography, including NASA LROC NAC products, and evaluate DEM resolutions up to 10 m/pixel.</p>
+      </div>
+      <div class="motivation-card reveal">
+        <img src="assets/motivation.png" alt="Dense local rover LiDAR compared with a coarse global lunar DEM." loading="lazy">
+        <p class="mini-note"><strong>Dense local LiDAR vs. coarse global DEM.</strong> The sampling gap motivates a common continuous representation rather than direct dependence on matched scan density.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section" id="contributions">
+  <div class="container">
+    <h2 class="section-title">Contributions</h2>
+    <p class="section-lead">The method is designed around one constraint: obtain a map-wide global pose fix from a single levelled rover LiDAR scan without a reference-scan database or bounded position initialization.</p>
+    <div class="card-grid">
+      <article class="info-card" style="--card-accent:#3f6fb6">
+        <div class="info-index">01</div>
+        <h3>Common continuous height-field representation</h3>
+        <p>A coarse orbital DEM and a single LiDAR scan are represented as cubic B-spline height fields, supporting continuous evaluation and analytic map gradients between the source samples.</p>
+      </article>
+      <article class="info-card" style="--card-accent:#3d8b74">
+        <div class="info-index">02</div>
+        <h3>Map-wide retrieval by masked FFT</h3>
+        <p>An offset-invariant, mean-centred height objective decomposes into masked cross-correlations. This turns translation search at sampled headings into a small set of FFT correlations.</p>
+      </article>
+      <article class="info-card" style="--card-accent:#7456a7">
+        <div class="info-index">03</div>
+        <h3>Coarse-map and native-product evaluation</h3>
+        <p>Evaluation spans four lunar terrains, six DEM resolutions, a terrain-representation study, and a native orbital-product experiment using LROC NAC DTMs and a shape-from-shading DEM.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section" id="method">
+  <div class="container">
+    <h2 class="section-title">Method</h2>
+    <p class="section-lead">SplineLoc estimates planar pose <strong>&xi; = [c<sub>x</sub>, c<sub>y</sub>, &psi;]<sup>T</sup></strong>. Roll and pitch are supplied by an external attitude estimator only for scan levelling.</p>
+
+    <div class="flow" id="flow">
+      <div class="flow-node active" data-stage="0" tabindex="0"><div class="n">0 · OFFLINE</div><div class="label">Map spline</div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node" data-stage="1" tabindex="0"><div class="n">1 · ONLINE</div><div class="label">Scan spline</div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node" data-stage="2" tabindex="0"><div class="n">2 · GLOBAL</div><div class="label">Masked-FFT retrieval</div></div>
+      <div class="flow-arrow">&rarr;</div>
+      <div class="flow-node" data-stage="3" tabindex="0"><div class="n">3 · CONTINUOUS</div><div class="label">Point-based refinement</div></div>
+    </div>
+
+    <div class="flow-detail" id="flow-detail"></div>
+    <div hidden id="flow-stage-0"><h3>0 · Map representation</h3><p>The georeferenced DEM is fitted once per site with a cubic B-spline height field <em>f</em><sub>M</sub>. The map knot spacing is h<sub>M</sub> = max(4 m, r<sub>D</sub>), preventing a coefficient grid finer than the source DEM when the reference map becomes coarse.</p></div>
+    <div hidden id="flow-stage-1"><h3>1 · Scan representation</h3><p>The levelled LiDAR scan is fitted with a penalized cubic B-spline field <em>f</em><sub>S</sub>. Retrieval samples both continuous fields onto a common 4 m lattice, with support restricted to cells near measured LiDAR points.</p></div>
+    <div hidden id="flow-stage-2"><h3>2 · Map-wide global retrieval</h3><p>For each of 24 sampled headings, SplineLoc removes the mean scan-map height offset over valid overlap and evaluates the relative-height mismatch for all translations through masked cross-correlations. The lowest-cost K = 100 translation-heading hypotheses are retained.</p></div>
+    <div hidden id="flow-stage-3"><h3>3 · Local refinement and re-ranking</h3><p>Each retained hypothesis is refined in continuous (c<sub>x</sub>, c<sub>y</sub>, &psi;) using measured LiDAR points directly against <em>f</em><sub>M</sub>. Gauss-Newton uses the analytic map gradient and the same mean-centred height-error form; refined candidates are re-ranked by the point-based cost.</p></div>
+
+    <figure class="method-figure reveal">
+      <div class="media-card"><img src="assets/pipeline.png" alt="SplineLoc pipeline from map and scan spline representation through global FFT retrieval and local refinement." loading="lazy"></div>
+      <figcaption class="caption"><strong>SplineLoc pipeline.</strong> Retrieval uses spline-derived rasters for efficient map-wide search; refinement uses the measured LiDAR points directly for metric pose estimation.</figcaption>
+    </figure>
+
+    <div class="method-note reveal">
+      <div><b>Offset-invariant matching</b><span>The overlap mean of the scan-map height difference is removed, so matching focuses on relative terrain-height variation rather than an unknown constant vertical offset.</span></div>
+      <div><b>Masked cross-correlation</b><span>After expanding the mean-centred squared error, translation-dependent terms become discrete correlations, which are evaluated efficiently by FFT with zero-padding.</span></div>
+      <div><b>Measured-point refinement</b><span>Final optimization does not stay on the retrieval lattice. Continuous map evaluation permits sub-cell pose estimates without claiming to recover terrain detail absent from the DEM.</span></div>
+    </div>
+
+    <figure style="margin-top:2.2rem" class="reveal">
+      <div class="media-card"><img src="assets/retrieval.png" alt="Map-wide SplineLoc retrieval over translations and sampled headings, from LiDAR query to full-map localization result." loading="lazy"></div>
+      <figcaption class="caption"><strong>Map-wide retrieval over translations and headings.</strong> The same offset-invariant objective is evaluated across the full map and sampled headings, producing the shortlist used by the continuous refinement stage.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section" id="evaluation">
+  <div class="container">
+    <h2 class="section-title">Lunar Evaluation</h2>
+    <p class="section-lead">The evaluation uses a lunar simulation dataset initialized from real orbital topography. A fixed set of 100 query scans per site is reused across all methods and resolutions.</p>
+
+    <div class="eval-grid">
+      <figure class="reveal">
+        <div class="media-card"><img src="assets/sites.png" alt="Apollo 11, Apollo 14, Apollo 15, and Haworth lunar evaluation sites with rover trajectories." loading="lazy"></div>
+        <figcaption class="caption"><strong>Four lunar sites and rover trajectories.</strong> Red curves indicate the rover paths; blue curves show elevation contours.</figcaption>
+      </figure>
+
+      <div>
+        <div class="site-list">
+          <article class="site-card reveal"><h3>Apollo 11</h3><div class="meta">300 &times; 320 m · 2 m/pixel source DTM</div><p>Weak, low-relief mare terrain. The map is comparable to the LiDAR footprint, testing whether distributed height variation remains sufficient without a prominent landmark.</p></article>
+          <article class="site-card reveal"><h3>Apollo 14</h3><div class="meta">2000 &times; 2000 m · 2 m/pixel LROC NAC DTM</div><p>Crater relief over a large map, providing one of the primary map-wide retrieval settings.</p></article>
+          <article class="site-card reveal"><h3>Apollo 15</h3><div class="meta">2000 &times; 2000 m · 2 m/pixel LROC NAC DTM</div><p>Directional relief near Hadley Rille; also a primary large-scale map-wide retrieval setting.</p></article>
+          <article class="site-card reveal"><h3>Haworth</h3><div class="meta">400 &times; 400 m · 1 m/pixel SfS DEM</div><p>Extended crater-wall slopes with similar local surface normals; this is the most ambiguous terrain among the four sites.</p></article>
+        </div>
+
+        <div class="protocol-strip reveal">
+          <div class="protocol-item"><strong>128 ch.</strong><span>360&deg; simulated rover LiDAR</span></div>
+          <div class="protocol-item"><strong>100</strong><span>fixed queries per site</span></div>
+          <div class="protocol-item"><strong>6</strong><span>DEM resolutions: 0.25-10 m/pixel</span></div>
+          <div class="protocol-item"><strong>0</strong><span>position/heading initialization</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section" id="results">
+  <div class="container">
+    <h2 class="section-title">Localization Across DEM Resolutions</h2>
+    <p class="section-lead">The chart and table below average SR@5m over the four sites at each resolution. SplineLoc uses the same configuration throughout the sweep; only the map knot spacing follows the DEM when r<sub>D</sub> exceeds 4 m.</p>
+
+    <div class="chart-wrap reveal">
+      <canvas id="sr-chart" aria-label="Mean SR at 5 meters across DEM resolutions for evaluated methods"></canvas>
+      <div class="legend" aria-hidden="true">
+        <span><i class="swatch" style="background:#3d8b74"></i>SplineLoc</span>
+        <span><i class="swatch" style="background:#3f6fb6"></i>RING</span>
+        <span><i class="swatch" style="background:#7456a7"></i>BEVPlace++</span>
+        <span><i class="swatch" style="background:#bf6d38"></i>DARCES</span>
+        <span><i class="swatch" style="background:#9aa0a8"></i>ICP</span>
+      </div>
+    </div>
+
+    <div class="table-scroll reveal">
+      <table aria-label="Four-site mean localization success rate by DEM resolution">
+        <thead><tr><th>DEM res. (m/pixel)</th><th>DARCES</th><th>BEVPlace++</th><th>RING</th><th>ICP</th><th>SplineLoc</th></tr></thead>
+        <tbody>
+          <tr><td>0.25</td><td>9.25%</td><td>45.75%</td><td>54.25%</td><td>0.25%</td><td class="ours">94.75%</td></tr>
+          <tr><td>0.5</td><td>28.25%</td><td>47.25%</td><td>56.00%</td><td>0.25%</td><td class="ours">94.50%</td></tr>
+          <tr><td>1</td><td>36.00%</td><td>46.75%</td><td>55.50%</td><td>0.00%</td><td class="ours">94.50%</td></tr>
+          <tr><td>2</td><td>28.75%</td><td>42.00%</td><td>54.50%</td><td>0.25%</td><td class="ours">94.25%</td></tr>
+          <tr><td>5</td><td>17.50%</td><td>14.75%</td><td>29.25%</td><td>0.25%</td><td class="ours">94.50%</td></tr>
+          <tr><td>10</td><td>0.00%</td><td>1.00%</td><td>2.75%</td><td>0.75%</td><td class="ours">91.75%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="table-note">Mean values above are computed from Table I by averaging the four reported site-level SR@5m values at each resolution. The manuscript's primary comparisons remain the per-site results in Table I.</p>
+
+    <h3 style="text-align:center;color:var(--ink);margin:2.2rem 0 .8rem;font-size:1.12rem">10 m/pixel site-level SplineLoc results</h3>
+    <div class="site-result-grid reveal">
+      <div class="site-result"><h3>Apollo 11</h3><div class="big">96%</div><div class="small">1.86 m median horizontal error</div></div>
+      <div class="site-result"><h3>Apollo 14</h3><div class="big">96%</div><div class="small">1.22 m median · 2 km &times; 2 km map</div></div>
+      <div class="site-result"><h3>Apollo 15</h3><div class="big">97%</div><div class="small">1.84 m median · 2 km &times; 2 km map</div></div>
+      <div class="site-result"><h3>Haworth</h3><div class="big">78%</div><div class="small">1.79 m median · most ambiguous terrain</div></div>
+    </div>
+
+    <figure style="margin-top:2rem" class="reveal">
+      <div class="media-card"><img src="assets/qualitative.png" alt="The same LiDAR query localized against DEMs from 0.25 to 10 meters per pixel." loading="lazy"></div>
+      <figcaption class="caption"><strong>Qualitative localization across DEM resolutions.</strong> For the same query, the estimated pose remains nearly unchanged from 0.25 to 2 m/pixel and degrades moderately as the DEM is coarsened to 5 and 10 m/pixel.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section" id="robustness">
+  <div class="container">
+    <h2 class="section-title">Why the Continuous Representation Matters</h2>
+    <p class="section-lead">Two additional studies separate the effect of terrain representation from the main resolution sweep and test whether the result persists when the simulation-derived reference map is replaced by its native orbital product.</p>
+
+    <div class="two-col">
+      <div class="callout reveal">
+        <h3>Terrain representation under coarse DEMs</h3>
+        <p>With the localization pipeline held fixed, the manuscript compares the B-spline field with bilinear and nearest-neighbor interpolation on Apollo 14 and Apollo 15 (200 pooled queries per condition).</p>
+        <figure style="margin:.85rem 0 1rem"><img src="assets/spline_profiles.png" alt="Map-spline height profiles across DEM resolutions from 1 to 10 meters per pixel." loading="lazy" style="width:100%;border-radius:8px;border:1px solid var(--line)"></figure>
+        <div class="table-scroll compact-table">
+          <table aria-label="Success rate by terrain representation">
+            <thead><tr><th>Representation</th><th>2 m</th><th>5 m</th><th>10 m</th><th>20 m</th><th>50 m</th></tr></thead>
+            <tbody>
+              <tr><td><strong>B-spline</strong></td><td>99.0%</td><td>99.5%</td><td>96.5%</td><td>83.5%</td><td class="ours">21.5%</td></tr>
+              <tr><td>Bilinear</td><td>99.5%</td><td>99.5%</td><td>95.5%</td><td>75.5%</td><td>0.5%</td></tr>
+              <tr><td>NN</td><td>99.0%</td><td>99.0%</td><td>91.0%</td><td>56.0%</td><td>0.5%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mini-note">At fine resolutions the three representations are similar. Their separation becomes pronounced when the DEM cell size becomes large relative to useful terrain variation.</p>
+      </div>
+
+      <div class="callout reveal">
+        <h3>Native orbital reference maps</h3>
+        <p>The resolution sweep uses maps exported from the query-generating simulation terrain. The paper separately replaces these with native LROC NAC DTMs (Apollo) and the native SfS DEM (Haworth), plus area-mean downsampling to 5 and 10 m/pixel.</p>
+        <div class="metric-pair">
+          <div class="metric-box"><strong>&le; 2 pp</strong><span>maximum SR@5m change at any tested site/resolution</span></div>
+          <div class="metric-box"><strong>same queries</strong><span>and same SplineLoc configuration for the native-map experiment</span></div>
+        </div>
+        <div class="table-scroll compact-table" style="margin-top:1rem">
+          <table aria-label="Native orbital map results at 10 meters per pixel">
+            <thead><tr><th>Site</th><th>Sim.-derived</th><th>Native product</th></tr></thead>
+            <tbody>
+              <tr><td>Apollo 11</td><td>96%</td><td class="ours">95%</td></tr>
+              <tr><td>Apollo 14</td><td>96%</td><td class="ours">97%</td></tr>
+              <tr><td>Apollo 15</td><td>97%</td><td class="ours">98%</td></tr>
+              <tr><td>Haworth</td><td>78%</td><td class="ours">78%</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mini-note">The paper interprets the close agreement as evidence that localization is using terrain structure shared across map representations rather than only simulation-specific fine-scale additions.</p>
+      </div>
+    </div>
+
+    <div class="callout reveal" style="margin-top:1.4rem">
+      <h3>Computational cost</h3>
+      <p>Reported timings are averaged over eight queries per site in an isolated single-process CPU run on an Intel Core i5-13400F with 64 GB DDR5-5600.</p>
+      <div class="runtime-grid">
+        <div class="runtime-item"><strong>&le; 0.22 s</strong><span>offline map fitting</span></div>
+        <div class="runtime-item"><strong>0.7-4.9 s</strong><span>scan fitting</span></div>
+        <div class="runtime-item"><strong>0.15-1.24 s</strong><span>masked-FFT retrieval</span></div>
+        <div class="runtime-item"><strong>0.5-1.3 s</strong><span>candidate refinement</span></div>
+      </div>
+      <p class="mini-note">The method targets periodic global fixes rather than per-frame pose estimation, permitting stationary scan acquisition in the evaluated use case.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section" id="video">
+  <div class="container">
+    <h2 class="section-title">Supplementary Video</h2>
+    <p class="section-lead">High-resolution supplementary material accompanying the anonymous submission.</p>
+    <div class="video-frame reveal">
+      <iframe src="https://www.youtube-nocookie.com/embed/PUH1bFgI6RI" title="SplineLoc supplementary video" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section" id="code">
+  <div class="container">
+    <h2 class="section-title">Code</h2>
+    <div class="code-note reveal">
+      <p>The source-code repository is intentionally not linked to an author- or institution-identifying account during double-anonymous review. The public repository link can be inserted here for the camera-ready version.</p>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section class="section" id="bibtex">
+  <div class="container">
+    <h2 class="section-title">BibTeX</h2>
+    <div class="bib-wrap reveal">
+      <button class="copy-btn" id="copy-bib" type="button">Copy</button>
+      <pre><code id="bib-code">% Citation withheld during double-anonymous review.
+% Replace this block with the final BibTeX entry after acceptance.</code></pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>Anonymous submission. Author- and institution-identifying information is omitted for double-anonymous review.</p>
+  <p>No analytics are included. The supplementary video uses YouTube's privacy-enhanced embed domain.</p>
+</footer>
+
+<script>
+(function(){
+  /* Reveal-on-scroll */
+  const revealTargets=[...document.querySelectorAll('.reveal,.stat-card,.info-card')];
+  if(!('IntersectionObserver' in window)){
+    revealTargets.forEach(el=>el.classList.add('show'));
+  }else{
+    const io=new IntersectionObserver((entries,obs)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          const siblings=revealTargets.indexOf(entry.target);
+          setTimeout(()=>entry.target.classList.add('show'), Math.min((siblings%5)*55,220));
+          obs.unobserve(entry.target);
+        }
+      });
+    },{threshold:.12});
+    revealTargets.forEach(el=>io.observe(el));
+  }
+
+  /* Stat cards */
+  const statCards=[...document.querySelectorAll('.stat-card[data-stat]')];
+  const statDetail=document.getElementById('stat-detail');
+  function toggleStat(card){
+    const selected=card.classList.contains('selected');
+    statCards.forEach(c=>c.classList.remove('selected'));
+    if(selected){statDetail.classList.remove('open');return;}
+    card.classList.add('selected');
+    const src=document.getElementById('stat-'+card.dataset.stat);
+    statDetail.innerHTML=src?src.innerHTML:'';
+    statDetail.classList.add('open');
+  }
+  statCards.forEach(card=>{
+    card.addEventListener('click',()=>toggleStat(card));
+    card.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggleStat(card);}});
+  });
+
+  /* Interactive method flow */
+  const flowNodes=[...document.querySelectorAll('.flow-node[data-stage]')];
+  const flowDetail=document.getElementById('flow-detail');
+  function showStage(node){
+    flowNodes.forEach(n=>n.classList.toggle('active',n===node));
+    const src=document.getElementById('flow-stage-'+node.dataset.stage);
+    flowDetail.innerHTML=src?src.innerHTML:'';
+  }
+  flowNodes.forEach(node=>{
+    node.addEventListener('click',()=>showStage(node));
+    node.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();showStage(node);}});
+  });
+  if(flowNodes.length)showStage(flowNodes[0]);
+
+  /* Sticky subnav and active section */
+  const subnav=document.getElementById('subnav');
+  const navLinks=[...subnav.querySelectorAll('a')];
+  const sections=navLinks.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+  function navVisibility(){subnav.classList.toggle('visible',window.scrollY>420)}
+  navVisibility();window.addEventListener('scroll',navVisibility,{passive:true});
+  if('IntersectionObserver' in window){
+    const sectionIO=new IntersectionObserver(entries=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          navLinks.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+entry.target.id));
+        }
+      });
+    },{rootMargin:'-38% 0px -55% 0px'});
+    sections.forEach(s=>sectionIO.observe(s));
+  }
+
+  /* Responsive vanilla-canvas chart: four-site mean SR@5m */
+  const canvas=document.getElementById('sr-chart');
+  const series=[
+    {name:'SplineLoc',color:'#3d8b74',values:[94.75,94.50,94.50,94.25,94.50,91.75],width:3.4},
+    {name:'RING',color:'#3f6fb6',values:[54.25,56.00,55.50,54.50,29.25,2.75],width:2.2},
+    {name:'BEVPlace++',color:'#7456a7',values:[45.75,47.25,46.75,42.00,14.75,1.00],width:2.2},
+    {name:'DARCES',color:'#bf6d38',values:[9.25,28.25,36.00,28.75,17.50,0.00],width:2.0},
+    {name:'ICP',color:'#9aa0a8',values:[0.25,0.25,0.00,0.25,0.25,0.75],width:1.8}
+  ];
+  const xLabels=['0.25','0.5','1','2','5','10'];
+  function drawChart(){
+    if(!canvas)return;
+    const parent=canvas.parentElement;
+    const cssW=Math.max(300,parent.clientWidth-32);
+    const cssH=330;
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    canvas.style.width=cssW+'px';canvas.style.height=cssH+'px';
+    canvas.width=Math.round(cssW*dpr);canvas.height=Math.round(cssH*dpr);
+    const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);
+    const m={l:52,r:18,t:18,b:54};
+    const w=cssW-m.l-m.r,h=cssH-m.t-m.b;
+    ctx.clearRect(0,0,cssW,cssH);
+    ctx.font='12px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Arial,sans-serif';
+    ctx.lineCap='round';ctx.lineJoin='round';
+    for(let y=0;y<=100;y+=20){
+      const py=m.t+h-(y/100)*h;
+      ctx.strokeStyle='#e7e9ec';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(m.l,py);ctx.lineTo(m.l+w,py);ctx.stroke();
+      ctx.fillStyle='#7a818a';ctx.textAlign='right';ctx.textBaseline='middle';ctx.fillText(y+'%',m.l-8,py);
+    }
+    xLabels.forEach((lab,i)=>{
+      const px=m.l+(i/(xLabels.length-1))*w;
+      ctx.fillStyle='#6f7680';ctx.textAlign='center';ctx.textBaseline='top';ctx.fillText(lab,px,m.t+h+12);
+    });
+    ctx.fillStyle='#6f7680';ctx.textAlign='center';ctx.fillText('DEM resolution (m/pixel)',m.l+w/2,cssH-17);
+    series.forEach(s=>{
+      ctx.strokeStyle=s.color;ctx.fillStyle=s.color;ctx.lineWidth=s.width;
+      ctx.beginPath();
+      s.values.forEach((v,i)=>{
+        const x=m.l+(i/(xLabels.length-1))*w;
+        const y=m.t+h-(v/100)*h;
+        if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+      });ctx.stroke();
+      s.values.forEach((v,i)=>{
+        const x=m.l+(i/(xLabels.length-1))*w;
+        const y=m.t+h-(v/100)*h;
+        ctx.beginPath();ctx.arc(x,y,s.name==='SplineLoc'?4.2:3,0,Math.PI*2);ctx.fill();
+      });
+    });
+  }
+  drawChart();
+  let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(drawChart,100)});
+
+  /* BibTeX copy */
+  const copyBtn=document.getElementById('copy-bib');
+  if(copyBtn){copyBtn.addEventListener('click',async()=>{
+    const text=document.getElementById('bib-code').innerText;
+    try{await navigator.clipboard.writeText(text);copyBtn.textContent='Copied';setTimeout(()=>copyBtn.textContent='Copy',1200);}catch(_){copyBtn.textContent='Select text';}
+  });}
+})();
+</script>
+</body>
+</html>
